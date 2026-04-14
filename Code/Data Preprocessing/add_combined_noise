@@ -1,0 +1,63 @@
+import numpy as np
+import pandas as pd
+
+# ---------------------------------------------------------
+# Noise functions
+# ---------------------------------------------------------
+def gaussian(n): return np.random.normal(0, 1, n)
+def poisson(n): return np.random.poisson(5, n) - 5
+def salt_and_pepper(n):
+    noise = np.zeros(n)
+    prob = 0.4
+    rnd = np.random.rand(n)
+    noise[rnd < prob] = 1
+    noise[rnd > 1 - prob] = -1
+    return noise
+def uniform(n): return np.random.uniform(-1, 1, n)
+def gamma_noise(n): return np.random.gamma(2.0, 1.0, n) - 2.0
+
+def combined_noise(n):
+    noises = [gaussian(n), poisson(n), salt_and_pepper(n), uniform(n), gamma_noise(n)]
+    return sum(noises) / len(noises)
+
+# ---------------------------------------------------------
+# Load spectral data
+# ---------------------------------------------------------
+df = pd.read_excel("spectral_signatures_resampled_phylosil.xlsx")
+
+wavelength = df.iloc[:, 0].values
+spectra_cols = df.columns[1:]
+
+# noise levels you want
+noise_levels = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]
+
+# ---------------------------------------------------------
+# Apply noise for each level
+# ---------------------------------------------------------
+for percent in noise_levels:
+    noise_factor = percent / 100.0
+    noisy_data = {"Wavelength": wavelength}
+
+    for col in spectra_cols:
+        reflectance = df[col].values.astype(float)  # ensure numeric
+        noisy = reflectance.copy()
+
+        # generate noise of same size
+        n = combined_noise(len(reflectance))
+
+        # apply scaled noise ONLY where reflectance != 0
+        mask = (reflectance != 0)
+        noisy[mask] = reflectance[mask] + n[mask] * noise_factor
+
+        # keep values valid
+        noisy = np.clip(noisy, 0, 1)
+
+        noisy_data[col] = noisy
+
+    # build DataFrame all at once → avoids fragmentation warning
+    noisy_df = pd.DataFrame(noisy_data)
+
+    out_name = f"noisy_phylosil{percent}.xlsx"
+    noisy_df.to_excel(out_name, index=False)
+    print(f"Saved: {out_name}")
+

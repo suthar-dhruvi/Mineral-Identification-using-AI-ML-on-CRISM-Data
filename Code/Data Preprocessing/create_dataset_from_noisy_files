@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+
+files = [
+    "noisy_phylosil2.xlsx",
+    "noisy_phylosil4.xlsx",
+    "noisy_phylosil6.xlsx",
+    "noisy_phylosil8.xlsx",
+    "noisy_phylosil10.xlsx",
+    "noisy_phylosil15.xlsx",
+    "noisy_phylosil20.xlsx",
+    "noisy_phylosil25.xlsx",
+    "noisy_phylosil30.xlsx",
+    "noisy_phylosil35.xlsx",
+    "noisy_phylosil40.xlsx",
+    "noisy_phylosil45.xlsx",
+    "noisy_phylosil50.xlsx",
+    "noisy_phylosil50.xlsx",
+    "noisy_phylosil55.xlsx",
+    "noisy_phylosil60.xlsx",
+    "noisy_phylosil65.xlsx",
+    "noisy_phylosil70.xlsx",
+    "noisy_phylosil75.xlsx",
+    "noisy_phylosil80.xlsx",
+    "noisy_phylosil85.xlsx",
+    "noisy_phylosil90.xlsx",
+    "noisy_phylosil95.xlsx",
+    "noisy_phylosil100.xlsx"
+]
+
+
+
+all_dfs = []
+
+for file in files:
+    # Load each noisy file
+    df = pd.read_excel(file)
+    
+    # We just collect the full DataFrame
+    # This keeps the wavelength headers intact
+    all_dfs.append(df)
+
+# Stack all DataFrames vertically (Row-wise)
+# ignore_index=True gives you a clean row count from 0 to Total
+final_df = pd.concat(all_dfs, axis=0, ignore_index=True)
+
+# Save the master file
+output_name = "dataset_resampled_phylosil.xlsx"
+final_df.to_excel(output_name, index=False)
+
+print(f"Dataset created successfully with shape: {final_df.shape}")

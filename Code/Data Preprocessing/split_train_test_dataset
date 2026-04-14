@@ -1,0 +1,33 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+ 
+# --------------------------------
+# 1. LOAD DATASET
+# --------------------------------
+
+file = "dataset_phylosil.xlsx"   # change if needed
+df = pd.read_excel(file)
+
+print("Original shape:", df.shape)
+
+# --------------------------------
+# 2. SPLIT 80 / 20 (RANDOM)
+# --------------------------------
+
+train_df, test_df = train_test_split(
+    df,
+    test_size=0.20,     # 20% test
+    shuffle=True
+)
+
+print("Train shape:", train_df.shape)
+print("Test shape :", test_df.shape)
+
+# --------------------------------
+# 3. SAVE FILES
+# --------------------------------
+
+train_df.to_excel("train_dataset_phylosil.xlsx", index=False)
+test_df.to_excel("test_dataset_phylosil.xlsx", index=False)
+
+print("\nFiles created successfully")

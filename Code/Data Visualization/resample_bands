@@ -1,0 +1,64 @@
+#interpolate from 1501 to 489
+import numpy as np
+import pandas as pd
+
+# -------------------------------------------------
+# 1. LOAD YOUR EXCEL LIBRARY (1501 bands)
+# -------------------------------------------------
+excel_file = "spectral_signatures_phylosil.xlsx"
+
+df = pd.read_excel(excel_file, index_col=0)
+
+# Original wavelength (1501 values)
+original_wvl = df.index.values.astype(float)
+
+# Spectral data (1501 × minerals)
+original_spectra = df.values
+
+print("Original shape:", original_spectra.shape)
+
+
+# -------------------------------------------------
+# 2. LOAD TARGET WAVELENGTHS (489 bands)
+# -------------------------------------------------
+# OPTION A: If you have CRISM wavelength file (recommended)
+# target_wvl = np.loadtxt("crism_wavelengths.txt")
+
+# OPTION B: If you just want to resample evenly to 489 points
+target_wvl = np.linspace(original_wvl.min(),
+                         original_wvl.max(),
+                         489)
+
+print("Target wavelength size:", len(target_wvl))
+
+
+# -------------------------------------------------
+# 3. INTERPOLATION
+# -------------------------------------------------
+resampled_spectra = []
+
+for i in range(original_spectra.shape[1]):  # loop minerals
+    spectrum = original_spectra[:, i]
+    
+    interp_spectrum = np.interp(target_wvl,
+                                original_wvl,
+                                spectrum)
+    
+    resampled_spectra.append(interp_spectrum)
+
+resampled_spectra = np.array(resampled_spectra).T
+
+print("Resampled shape:", resampled_spectra.shape)
+
+
+# -------------------------------------------------
+# 4. SAVE TO EXCEL
+# -------------------------------------------------
+resampled_df = pd.DataFrame(resampled_spectra,
+                            index=target_wvl,
+                            columns=df.columns)
+
+output_file = "spectral_signatures_resampled_phylosil.xlsx"
+resampled_df.to_excel(output_file)
+
+print("Resampled Excel saved as:", output_file)
